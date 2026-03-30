@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="refresh" content="0; url=./te-summary/te-weekly-report-2026-03-23-30.html">
 <title>Transformer Engine Weekly Summary</title>
 <style>
   :root {
@@ -143,26 +142,80 @@
   </div>
   
   <div class="redirect-notice">
-    如果没有自动跳转，请 <a href="./te-summary/te-weekly-report-2026-03-23-30.html">点击这里</a>
+    如果没有自动跳转，请 <a id="manual-link" href="#">点击这里</a>
   </div>
 
   <div class="recent-reports">
     <h2>近期周报</h2>
-    <ul class="report-list">
-      <li class="report-item">
-        <a href="./te-summary/te-weekly-report-2026-03-23-30.html">
-          <span>2026-03-23 ~ 03-30 (W13)</span>
-          <span class="badge-latest">最新</span>
-        </a>
-      </li>
-      <li class="report-item">
-        <a href="./te-summary/te-weekly-report-2026-03-16-22.html">
-          <span>2026-03-16 ~ 03-22 (W12)</span>
-          <span class="report-date">2 周前</span>
-        </a>
-      </li>
+    <ul class="report-list" id="report-list">
+      <!-- 报告列表将由 JavaScript 自动生成 -->
     </ul>
   </div>
+
+<script>
+(function() {
+  // 预定义的周报文件列表（按日期降序排列）
+  // 添加新周报时，只需在此数组开头插入新条目
+  const reports = [
+    { file: 'te-weekly-report-2026-03-23-30.html', date: '2026-03-23 ~ 03-30', week: 'W13' },
+    { file: 'te-weekly-report-2026-03-16-22.html', date: '2026-03-16 ~ 03-22', week: 'W12' },
+  ];
+
+  const summaryPath = './te-summary/';
+  const reportList = document.getElementById('report-list');
+  const manualLink = document.getElementById('manual-link');
+
+  // 生成报告列表
+  function generateReportList() {
+    reportList.innerHTML = '';
+    
+    reports.forEach((report, index) => {
+      const li = document.createElement('li');
+      li.className = 'report-item';
+      
+      const isLatest = index === 0;
+      const badge = isLatest 
+        ? '<span class="badge-latest">最新</span>'
+        : `<span class="report-date">${getRelativeTime(index)}</span>`;
+      
+      li.innerHTML = `
+        <a href="${summaryPath}${report.file}">
+          <span>${report.date} (${report.week})</span>
+          ${badge}
+        </a>
+      `;
+      
+      reportList.appendChild(li);
+    });
+  }
+
+  // 获取相对时间描述
+  function getRelativeTime(index) {
+    if (index === 0) return '今天';
+    if (index === 1) return '1 周前';
+    if (index === 2) return '2 周前';
+    if (index < 5) return `${index} 周前`;
+    return `${index} 周前`;
+  }
+
+  // 自动跳转到最新报告
+  function autoRedirect() {
+    if (reports.length > 0) {
+      const latest = reports[0];
+      manualLink.href = summaryPath + latest.file;
+      
+      // 延迟跳转，让用户看到主页
+      setTimeout(() => {
+        window.location.href = summaryPath + latest.file;
+      }, 1500);
+    }
+  }
+
+  // 初始化
+  generateReportList();
+  autoRedirect();
+})();
+</script>
 </div>
 
 </body>

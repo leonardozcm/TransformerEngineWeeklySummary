@@ -154,21 +154,93 @@
 
 <script>
 (function() {
-  // 预定义的周报文件列表（按日期降序排列）
-  // 添加新周报时，只需在此数组开头插入新条目
-  const reports = [
-    { file: 'te-weekly-report-2026-04-05.html', date: '2026-03-31 ~ 04-05', week: 'W14' },
-    { file: 'te-weekly-report-2026-03-30.html', date: '2026-03-24 ~ 03-30', week: 'W13' },
-    { file: 'te-weekly-report-2026-03-22.html', date: '2026-03-17 ~ 03-22', week: 'W12' },
+  // ==================== 配置区域 ====================
+  // 只需列出文件名，日期和周数会自动计算
+  // 格式: te-weekly-report-YYYY-MM-DD.html（DD为周日日期）
+  const reportFiles = [
+    'te-weekly-report-2026-04-05.html',
+    'te-weekly-report-2026-03-30.html',
+    'te-weekly-report-2026-03-22.html',
   ];
+  // =================================================
 
   const summaryPath = './te-summary/';
   const reportList = document.getElementById('report-list');
   const manualLink = document.getElementById('manual-link');
 
+  // 从文件名解析日期 (te-weekly-report-YYYY-MM-DD.html)
+  function parseDateFromFilename(filename) {
+    const match = filename.match(/te-weekly-report-(\d{4})-(\d{2})-(\d{2})\.html/);
+    if (!match) return null;
+    const [_, year, month, day] = match;
+    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+  }
+
+  // 格式化日期范围 (周日往前推6天)
+  function formatDateRange(endDate) {
+    const startDate = new Date(endDate);
+    startDate.setDate(startDate.getDate() - 6);
+    
+    const fmt = (d) => {
+      const m = d.getMonth() + 1;
+      const day = d.getDate();
+      return `${m.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+    };
+    
+    const startYear = startDate.getFullYear();
+    const endYear = endDate.getFullYear();
+    
+    if (startYear !== endYear) {
+      return `${startYear}-${fmt(startDate)} ~ ${endYear}-${fmt(endDate)}`;
+    }
+    return `${startYear}-${fmt(startDate)} ~ ${fmt(endDate)}`;
+  }
+
+  // 计算周数 (ISO 8601 周数)
+  function getWeekNumber(date) {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  }
+
+  // 解析所有报告并排序（最新的在前）
+  function parseReports() {
+    const reports = reportFiles
+      .map(file => {
+        const date = parseDateFromFilename(file);
+        if (!date) return null;
+        return {
+          file,
+          date,
+          dateStr: formatDateRange(date),
+          week: getWeekNumber(date)
+        };
+      })
+      .filter(r => r !== null)
+      .sort((a, b) => b.date - a.date); // 降序排列
+    
+    return reports;
+  }
+
+  // 获取相对时间描述
+  function getRelativeTime(reportDate, now) {
+    const diffMs = now - reportDate;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffDays <= 0) return '今天';
+    if (diffDays === 1) return '昨天';
+    if (diffDays < 7) return `${diffDays} 天前`;
+    if (diffDays < 14) return '1 周前';
+    const weeks = Math.floor(diffDays / 7);
+    return `${weeks} 周前`;
+  }
+
   // 生成报告列表
-  function generateReportList() {
+  function generateReportList(reports) {
     reportList.innerHTML = '';
+    const now = new Date();
     
     reports.forEach((report, index) => {
       const li = document.createElement('li');
@@ -177,11 +249,11 @@
       const isLatest = index === 0;
       const badge = isLatest 
         ? '<span class="badge-latest">最新</span>'
-        : `<span class="report-date">${getRelativeTime(index)}</span>`;
+        : `<span class="report-date">${getRelativeTime(report.date, now)}</span>`;
       
       li.innerHTML = `
         <a href="${summaryPath}${report.file}">
-          <span>${report.date} (${report.week})</span>
+          <span>${report.dateStr} (W${report.week})</span>
           ${badge}
         </a>
       `;
@@ -190,17 +262,8 @@
     });
   }
 
-  // 获取相对时间描述
-  function getRelativeTime(index) {
-    if (index === 0) return '今天';
-    if (index === 1) return '1 周前';
-    if (index === 2) return '2 周前';
-    if (index < 5) return `${index} 周前`;
-    return `${index} 周前`;
-  }
-
   // 自动跳转到最新报告
-  function autoRedirect() {
+  function autoRedirect(reports) {
     if (reports.length > 0) {
       const latest = reports[0];
       manualLink.href = summaryPath + latest.file;
@@ -213,8 +276,9 @@
   }
 
   // 初始化
-  generateReportList();
-  autoRedirect();
+  const reports = parseReports();
+  generateReportList(reports);
+  autoRedirect(reports);
 })();
 </script>
 </div>

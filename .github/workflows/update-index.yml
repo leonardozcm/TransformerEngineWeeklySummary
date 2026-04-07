@@ -1,0 +1,38 @@
+name: Update Index
+
+on:
+  schedule:
+    # 每周一北京时间 11:30 运行（UTC 3:30）
+    - cron: '30 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-index:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Run update script
+        run: python update_index.py
+
+      - name: Check for changes and commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          if git diff --quiet; then
+            echo "No changes to commit"
+          else
+            git add index.html
+            git commit -m "chore: auto-update index.html report list"
+            git push
+          fi

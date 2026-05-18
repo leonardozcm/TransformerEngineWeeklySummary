@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transformer Engine 周报 | 2026-05-11 ~ 05-17 (W20)</title>
+<style>
+  :root {
+    --green: #76b900;
+    --green-dark: #5a8f00;
+    --bg: #0d1117;
+    --card: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --link: #58a6ff;
+    --badge-feature: #238636;
+    --badge-bugfix: #da3633;
+    --badge-ci: #8957e5;
+    --badge-doc: #1f6feb;
+    --badge-perf: #f0883e;
+    --badge-jax: #59cfd2;
+    --badge-compile: #d29922;
+    --badge-compat: #e85d75;
+    --badge-release: #f778ba;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 0;
+  }
+  .hero {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    border-bottom: 3px solid var(--green);
+    padding: 40px 0;
+    text-align: center;
+  }
+  .hero h1 {
+    font-size: 2.2em;
+    color: var(--green);
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+  .hero .subtitle {
+    color: var(--text-muted);
+    font-size: 1.1em;
+  }
+  .hero .date-range {
+    display: inline-block;
+    background: rgba(118,185,0,0.15);
+    color: var(--green);
+    padding: 6px 18px;
+    border-radius: 20px;
+    margin-top: 12px;
+    font-weight: 600;
+    font-size: 0.95em;
+  }
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 30px 24px;
+  }
+  .stats-bar {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .stat-card {
+    flex: 1;
+    min-width: 140px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+  .stat-card .num {
+    font-size: 2.4em;
+    font-weight: 700;
+    color: var(--green);
+  }
+  .stat-card .label {
+    color: var(--text-muted);
+    font-size: 0.85em;
+    margin-top: 4px;
+  }
+  .stat-card.highlight {
+    border-color: var(--badge-perf);
+    background: linear-gradient(135deg, #1a2518, #1a2015);
+  }
+  .stat-card.highlight .num {
+    color: var(--badge-perf);
+  }
+  .stat-card.release-highlight {
+    border-color: var(--badge-release);
+    background: linear-gradient(135deg, #2a1a28, #251a25);
+  }
+  .stat-card.release-highlight .num {
+    color: var(--badge-release);
+    font-size: 1.6em;
+  }
+  .section {
+    margin-bottom: 36px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-header h2 {
+    font-size: 1.4em;
+    color: var(--text);
+  }
+  .section-header .icon {
+    font-size: 1.4em;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: 600;
+    color: #fff;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .badge-feature { background: var(--badge-feature); }
+  .badge-bugfix { background: var(--badge-bugfix); }
+  .badge-ci { background: var(--badge-ci); }
+  .badge-doc { background: var(--badge-doc); }
+  .badge-perf { background: var(--badge-perf); }
+  .badge-jax { background: var(--badge-jax); color: #000; }
+  .badge-compile { background: var(--badge-compile); color: #000; }
+  .badge-compat { background: var(--badge-compat); }
+  .badge-release { background: var(--badge-release); color: #000; }
+  .badge-ver {
+    background: rgba(118,185,0,0.2);
+    color: var(--green);
+    border: 1px solid var(--green);
+  }
+  .badge-draft {
+    background: rgba(139,148,158,0.2);
+    color: var(--text-muted);
+    border: 1px solid var(--text-muted);
+  }
+  .badge-approved {
+    background: rgba(35,134,54,0.2);
+    color: #3fb950;
+    border: 1px solid #3fb950;
+  }
+  .badge-changes {
+    background: rgba(218,54,51,0.2);
+    color: #f85149;
+    border: 1px solid #f85149;
+  }
+  .badge-community {
+    background: rgba(170,86,224,0.2);
+    color: #d2a8fb;
+    border: 1px solid #d2a8fb;
+  }
+  .badge-breaking {
+    background: rgba(218,54,51,0.3);
+    color: #ff7b72;
+    border: 1px solid #ff7b72;
+  }
+  .pr-list {
+    list-style: none;
+  }
+  .pr-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+  }
+  .pr-item:hover {
+    border-color: var(--green);
+  }
+  .pr-title {
+    font-weight: 600;
+    font-size: 1em;
+  }
+  .pr-title a {
+    color: var(--link);
+    text-decoration: none;
+  }
+  .pr-title a:hover {
+    text-decoration: underline;
+  }
+  .pr-number {
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+  .pr-desc {
+    color: var(--text-muted);
+    font-size: 0.9em;
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+  .pr-meta {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .author {
+    color: var(--text-muted);
+    font-size: 0.8em;
+  }
+  .sub-section {
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+  .sub-section h3 {
+    font-size: 1.1em;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sub-count {
+    background: var(--border);
+    color: var(--text-muted);
+    font-size: 0.75em;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  .roadmap-card {
+    background: linear-gradient(135deg, #1a2332, #162230);
+    border: 1px solid #1f6feb;
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .roadmap-card h3 {
+    color: #58a6ff;
+    margin-bottom: 12px;
+  }
+  .roadmap-card ul {
+    list-style: none;
+    padding: 0;
+  }
+  .roadmap-card li {
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(48,54,61,0.6);
+    color: var(--text-muted);
+    font-size: 0.95em;
+  }
+  .roadmap-card li:last-child { border-bottom: none; }
+  .roadmap-card .highlight {
+    color: var(--text);
+    font-weight: 600;
+  }
+  .footer {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.8em;
+    padding: 30px 0;
+    border-top: 1px solid var(--border);
+    margin-top: 20px;
+  }
+  .toc {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 32px;
+  }
+  .toc h3 {
+    color: var(--text-muted);
+    font-size: 0.9em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+  .toc a {
+    color: var(--link);
+    text-decoration: none;
+    display: inline-block;
+    margin-right: 24px;
+    font-size: 0.95em;
+  }
+  .toc a:hover { text-decoration: underline; }
+  .reviewer-tag {
+    font-size: 0.75em;
+    color: var(--badge-compile);
+  }
+  .issue-closed {
+    background: linear-gradient(135deg, #161b22, #1a1f26);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--badge-feature);
+    border-radius: 10px;
+    padding: 14px 20px;
+    margin-bottom: 10px;
+  }
+  .issue-closed .pr-title a { color: var(--text-muted); }
+  .issue-closed .pr-desc { font-size: 0.85em; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Transformer Engine Weekly Report</h1>
+  <div class="subtitle">NVIDIA/TransformerEngine GitHub Repository Tracking</div>
+  <div class="date-range">2026-05-11 (Mon) ~ 2026-05-17 (Sat) &nbsp;|&nbsp; Week 20</div>
+</div>
+
+<div class="container">
+
+  <!-- Stats Bar -->
+  <div class="stats-bar">
+    <div class="stat-card release-highlight">
+      <div class="num">v2.15 Released!</div>
+      <div class="label">2026-05-13</div>
+    </div>
+    <div class="stat-card highlight">
+      <div class="num">18</div>
+      <div class="label">Merged PRs</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">18</div>
+      <div class="label">New Open PRs</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">6</div>
+      <div class="label">New Issues</div>
+    </div>
+    <div class="stat-card">
+      <div class="num">4</div>
+      <div class="label">Issues Closed</div>
+    </div>
+  </div>
+
+  <!-- TOC -->
+  <div class="toc">
+    <h3>Quick Navigation</h3>
+    <a href="#merged">1. Merged PRs</a>
+    <a href="#open">2. Open / In-Review PRs</a>
+    <a href="#issues">3. Community Issues</a>
+    <a href="#roadmap">4. Roadmap &amp; Release</a>
+  </div>
+
+  <!-- ==================== SECTION 1: MERGED PRS ==================== -->
+  <div class="section" id="merged">
+    <div class="section-header">
+      <span class="icon">&#x2705;</span>
+      <h2>已合入的 PR (Merged)</h2>
+    </div>
+
+    <!-- Features / Performance -->
+    <div class="sub-section">
+      <h3><span class="badge badge-feature">Feature</span><span class="badge badge-perf">Perf</span> 重要特性 &amp; 性能优化 <span class="sub-count">7</span></h3>
+    </div>
+    <ul class="pr-list">
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2975" target="_blank"><span class="pr-number">#2975</span> [JAX] Size autotuned Triton grids per config</a>
+        </div>
+        <div class="pr-desc">
+          修复 Triton autotuned 路径中所有 BLOCK_SIZE 配置共用同一固定 grid 的问题。此前 grid 按最小 BLOCK_SIZE 固定，导致大配置过度启动。改为 grid 接受 callable(meta)->tuple 按配置评估。GB200 上 sort_chunks (524k tokens, hidden=4096, fp32) 从 22.6ms 降至 7.4ms，<strong>提速 3.06 倍</strong>。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-perf">3x Speedup</span>
+          <span class="badge badge-jax">JAX</span>
+          <span class="badge badge-feature">Triton</span>
+          <span class="author">by tdophung &middot; merged 05-14</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2900" target="_blank"><span class="pr-number">#2900</span> [PyTorch] Expose function to bulk-allocate tensors backed by the same buffer</a>
+        </div>
+        <div class="pr-desc">
+          泛化 split-quantize 中的 bulk allocation 方案：分配单个大 buffer，通过 <code>at::from_blob</code> 创建 tensor subview。在 GroupedLinear 中按 expert 分配 tensor 时的 CPU overhead 显著降低。增量推进 <a href="https://github.com/NVIDIA/TransformerEngine/issues/2897" target="_blank">#2897</a>（CPU overhead 追踪 issue）。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-perf">CPU Overhead</span>
+          <span class="badge badge-feature">MoE</span>
+          <span class="author">by timmoon10 &middot; merged 05-12</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2958" target="_blank"><span class="pr-number">#2958</span> [Common] Use specialized unfused MXFP8 cast kernels by default</a>
+        </div>
+        <div class="pr-desc">
+          将快速 unfused MXFP8 cast kernel 设为默认启用。此前这些 kernel 被环境变量 gate 住需要显式开启。这一变更使 MXFP8 的 cast-only 路径直接走优化后的专用 kernel，无需用户手动配置。上周作为 Open PR 提出，本周成功合入。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-perf">Performance</span>
+          <span class="badge badge-feature">MXFP8</span>
+          <span class="author">by Oleg-Goncharov &middot; merged 05-12</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2957" target="_blank"><span class="pr-number">#2957</span> [PyTorch] CPU overhead optimizations for te autocast</a>
+        </div>
+        <div class="pr-desc">
+          优化 te-autocast 的 CPU 开销，在 Grace 系统上效果显著。具体措施：(1) 缓存 recipe 字符串表示以加速 autocast key 计算；(2) 直接访问缓存的表示比经过 <code>str(recipe)</code> 快约 40ns。上周作为 Open PR 提出，本周合入。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-perf">CPU Overhead</span>
+          <span class="badge badge-feature">Grace/Blackwell</span>
+          <span class="author">by vthumbe1503 &middot; merged 05-12</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2620" target="_blank"><span class="pr-number">#2620</span> [PyTorch] Introduce quantizer roles</a>
+        </div>
+        <div class="pr-desc">
+          引入 <code>QuantizerRole</code> dataclass（含 module_type、tensor_type、name 字段），提供细粒度的 per-module 量化控制 API。允许针对特定 transformer layer 中的特定 <code>LayerNormLinear</code> 设置不同的量化策略，为实际部署中"关键层少量化、非关键层激进量化"的混合精度策略提供支撑。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-feature">Quantization</span>
+          <span class="badge badge-feature">API</span>
+          <span class="author">by negvet &middot; merged 05-11</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2793" target="_blank"><span class="pr-number">#2793</span> Avoid CPU offload wait_event for validation</a>
+        </div>
+        <div class="pr-desc">
+          在 validation 阶段跳过 CPU offload 的 wait_event 同步，减少不必要的 CPU-GPU 同步开销。对使用 CPU offloading 的训练流程在 validation 阶段有直接的延迟改善。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-perf">CPU Overhead</span>
+          <span class="badge badge-feature">Offload</span>
+          <span class="author">by vasunvidia &middot; merged 05-12</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2666" target="_blank"><span class="pr-number">#2666</span> [PyTorch] Replace the make_empty implementation to use C++ implementation</a>
+        </div>
+        <div class="pr-desc">
+          将 QuantizedTensor 的创建路径统一为 C++ 实现的 <code>create_tensor</code>，替代原有 Python 层的 <code>make_empty</code>。减少跨语言调用开销，统一内存分配路径。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-perf">Perf</span>
+          <span class="badge badge-feature">QuantizedTensor</span>
+          <span class="author">by ptrendx &middot; merged 05-13</span>
+        </div>
+      </li>
+    </ul>
+
+    <!-- torch.compile -->
+    <div class="sub-section">
+      <h3><span class="badge badge-compile">torch.compile</span> torch.compile 支持 <span class="sub-count">1</span></h3>
+    </div>
+    <ul class="pr-list">
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2967" target="_blank"><span class="pr-number">#2967</span> [torch.compile][PyTorch] Prepare linear for torch compile</a>
+        </div>
+        <div class="pr-desc">
+          重构 <code>transformer_engine/pytorch/module/linear.py</code>，将 Linear module 整理为可被 <code>torch.library.custom_op</code> 包裹的形式。将 forward/backward 状态打包为 <code>LinearFwdArgs</code> / <code>LinearBwdArgs</code> dataclass，为后续 PR 中注册为 custom_op 做准备。这是 TE torch.compile 支持的关键基础设施 PR。上周作为 Open PR 提出，本周合入。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-compile">torch.compile</span>
+          <span class="badge badge-ci">Refactor</span>
+          <span class="author">by pggPL &middot; merged 05-11</span>
+        </div>
+      </li>
+    </ul>
+
+    <!-- Bugfix -->
+    <div class="sub-section">
+      <h3><span class="badge badge-bugfix">Bugfix</span> Bug 修复 <span class="sub-count">4</span></h3>
+    </div>
+    <ul class="pr-list">
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2968" target="_blank"><span class="pr-number">#2968</span> Disable the RHT fusion for non-SM100 family devices</a>
+        </div>
+        <div class="pr-desc">
+          禁用非 sm100 class 设备上的 RHT fusion（该 kernel 使用过多 shared memory，无法在 sm120 等设备上运行）。修复 <a href="https://github.com/NVIDIA/TransformerEngine/issues/2956" target="_blank">#2956</a> (RTX 5080 NVFP4 失败)。由核心开发者 ptrendx 快速响应社区报告。上周作为 Open PR 提出，本周合入。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-bugfix">Bug</span>
+          <span class="badge badge-feature">Blackwell</span>
+          <span class="badge badge-compat">sm120</span>
+          <span class="author">by ptrendx &middot; merged 05-12</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2907" target="_blank"><span class="pr-number">#2907</span> [Common][PyTorch] Fix int32 overflow and -1 sentinel handling in moe_permute</a>
+        </div>
+        <div class="pr-desc">
+          修复 <code>permutation.cu</code> 中两个自 PR #936 (2024-08) 以来潜伏的 bug：(1) <code>source_token</code>/<code>source_row</code>/<code>dest_row</code> 在 <code>row * num_cols</code> 计算时 int32 溢出，改用 int64_t；(2) <code>moe_permute_row_map</code> 未正确跳过 cub sort 留下的 -1 sentinel 前缀。修复 <a href="https://github.com/NVIDIA/TransformerEngine/issues/2908" target="_blank">#2908</a>。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-bugfix">Bug</span>
+          <span class="badge badge-feature">MoE</span>
+          <span class="badge badge-community">Community</span>
+          <span class="author">by jing-4369 &middot; merged 05-11</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2825" target="_blank"><span class="pr-number">#2825</span> fix(CP, FA): conditional logic vulnerability in Flash Attn version processing</a>
+        </div>
+        <div class="pr-desc">
+          修复 Context Parallelism 中 Flash Attention 版本条件判断的漏洞：当仅安装 FA3 而完全未安装 FA2 时，原有逻辑会出错。确保 FA 版本检测在各种安装组合下都能正确工作。标记为 <span class="badge badge-ver">2.16.0</span>。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-bugfix">Bug</span>
+          <span class="badge badge-feature">CP</span>
+          <span class="badge badge-community">Community</span>
+          <span class="badge badge-ver">2.16.0</span>
+          <span class="author">by zhujian19891203 &middot; merged 05-12</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2842" target="_blank"><span class="pr-number">#2842</span> [Core] Report CUDA versions when NVRTC compilation fails</a>
+        </div>
+        <div class="pr-desc">
+          NVRTC 编译涉及三个 CUDA 版本（编译时、运行时 runtime、运行时 headers），版本不一致时会产生难以诊断的错误。该 PR 在 NVRTC 编译失败时报告这三个版本信息，帮助用户快速定位系统配置问题。关闭 <a href="https://github.com/NVIDIA/TransformerEngine/issues/1018" target="_blank">#1018</a>（2024-07 提出的长期 bug）。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-bugfix">Bug</span>
+          <span class="badge badge-feature">NVRTC</span>
+          <span class="author">by timmoon10 &middot; merged 05-13</span>
+        </div>
+      </li>
+    </ul>
+
+    <!-- CI / Build -->
+    <div class="sub-section">
+      <h3><span class="badge badge-ci">CI/Build</span> 构建 &amp; CI <span class="sub-count">5</span></h3>
+    </div>
+    <ul class="pr-list">
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2980" target="_blank"><span class="pr-number">#2980</span> Added the CODEOWNERS file</a>
+        </div>
+        <div class="pr-desc">
+          为仓库添加 CODEOWNERS 文件，明确各模块的代码负责人，自动化 PR review 分配。有助于加速 PR review 流程。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-ci">Infra</span>
+          <span class="author">by ptrendx &middot; merged 05-13</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2987" target="_blank"><span class="pr-number">#2987</span> Remove epel-release package from wheel Dockerfiles</a>
+        </div>
+        <div class="pr-desc">
+          移除 wheel Dockerfile 中不再需要的 <code>epel-release</code> 包，该包的安装导致构建时间显著增加和镜像膨胀。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-ci">Build</span>
+          <span class="author">by ksivaman &middot; merged 05-14</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2989" target="_blank"><span class="pr-number">#2989</span> ci: declare contents:read on Lint workflow</a>
+        </div>
+        <div class="pr-desc">
+          为 Lint workflow 添加显式 <code>permissions: contents: read</code> 声明，与其他 workflow 保持一致。遵循最小权限原则，无行为变更。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-ci">CI</span>
+          <span class="author">by arpitjain099 &middot; merged 05-14</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2979" target="_blank"><span class="pr-number">#2979</span> [JAX] Add wait per multi-proc cleanup in L0_jax_distributed_unittest</a>
+        </div>
+        <div class="pr-desc">
+          在 JAX 分布式单元测试中添加 per-process cleanup 等待，防止后续测试进程在前一个测试 cleanup 完成之前启动，解决 QA 报告的 CGEMM 测试不匹配问题。标记为 <span class="badge badge-ver">2.16.0</span>。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-ci">CI Fix</span>
+          <span class="badge badge-jax">JAX</span>
+          <span class="badge badge-ver">2.16.0</span>
+          <span class="author">by phu0ngng &middot; merged 05-12</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2982" target="_blank"><span class="pr-number">#2982</span> Build Docs fix</a>
+        </div>
+        <div class="pr-desc">
+          修复文档构建流程中的问题。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-ci">Build</span>
+          <span class="badge badge-doc">Doc</span>
+          <span class="author">by vthumbe1503 &middot; merged 05-12</span>
+        </div>
+      </li>
+    </ul>
+
+    <!-- Refactor -->
+    <div class="sub-section">
+      <h3><span class="badge badge-ci">Refactor</span> 重构 <span class="sub-count">1</span></h3>
+    </div>
+    <ul class="pr-list">
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2962" target="_blank"><span class="pr-number">#2962</span> Refactor tensor class in C++ unit tests</a>
+        </div>
+        <div class="pr-desc">
+          重构 C++ 单元测试中的 tensor wrapper。原有实现中 recipe 和 memory management 耦合过深，导致 buffer 未分配的 bug (#2943)。新增简单的 RAII 类管理 GPU/CPU buffer，解耦内存管理与 recipe 逻辑，添加更多显式检查。上周作为 Open PR 提出，本周合入。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-ci">Refactor</span>
+          <span class="badge badge-ci">Test</span>
+          <span class="author">by timmoon10 &middot; merged 05-11</span>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- ==================== SECTION 2: OPEN PRS ==================== -->
+  <div class="section" id="open">
+    <div class="section-header">
+      <span class="icon">&#x1F50D;</span>
+      <h2>新提交 / 在 Review 的 PR (Open)</h2>
+    </div>
+    <p style="color:var(--text-muted); margin-bottom:16px; font-size:0.9em;">以下为上周 (5/11~5/17) 新创建且仍为 Open 状态的 PR，共 18 个（含 2 个 Draft）。</p>
+
+    <!-- Feature / Perf -->
+    <div class="sub-section">
+      <h3><span class="badge badge-feature">Feature</span><span class="badge badge-perf">Perf</span> 特性 &amp; 性能优化 <span class="sub-count">9</span></h3>
+    </div>
+    <ul class="pr-list">
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/3001" target="_blank"><span class="pr-number">#3001</span> Optimize function that loads pointers on GPU</a>
+        </div>
+        <div class="pr-desc">
+          优化 <code>tex.get_device_pointer_for_data_and_scales</code>：(1) 解决 85us/call 的显著 CPU 开销（减少堆分配），(2) 重命名/泛化为 <code>nvte_load_value_on_device</code>。每次调用 CPU 时间从 85us 降至 44us（<strong>-48%</strong>）。继续推进 <a href="https://github.com/NVIDIA/TransformerEngine/issues/2897" target="_blank">#2897</a>。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-perf">CPU Overhead</span>
+          <span class="badge badge-perf">-48%</span>
+          <span class="reviewer-tag">reviewers: ptrendx, ksivaman, Oleg-Goncharov, vthumbe1503</span>
+          <span class="author">by timmoon10 &middot; 05-16</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/3000" target="_blank"><span class="pr-number">#3000</span> TritonKernelCall: CUDA graph compatibility</a>
+        </div>
+        <div class="pr-desc">
+          此前 Triton kernel 调用无法被 CUDA graph 捕获，会作为独立 op 出现无法合并到 command buffer。JAX 近期添加了对 Triton kernel CUDA graph 兼容的支持，本 PR 将此能力接入 TE 的 JAX Triton 调用路径。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-feature">CUDA Graph</span>
+          <span class="badge badge-jax">JAX</span>
+          <span class="badge badge-feature">Triton</span>
+          <span class="author">by tdophung &middot; 05-15</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2985" target="_blank"><span class="pr-number">#2985</span> [JAX] Support for cuDNN-backed flex attention</a>
+        </div>
+        <div class="pr-desc">
+          <strong>本周亮点 Open PR。</strong>为 JAX 的 FusedAttention 后端引入 flex attention 支持。用户可指定 <code>score_mod</code> 和 <code>score_mod_bprop</code> 函数，路由到 cuDNN FE 的 sdpa/sdpa_backward 调用。标记为 <span class="badge badge-ver">2.16.0</span>。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-feature">Flex Attention</span>
+          <span class="badge badge-jax">JAX</span>
+          <span class="badge badge-ver">2.16.0</span>
+          <span class="reviewer-tag">reviewers: cyanguwa, KshitijLakhani</span>
+          <span class="author">by vcherepanov-nv &middot; 05-13</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2984" target="_blank"><span class="pr-number">#2984</span> [PyTorch] Support for cuDNN-backed flex attention</a>
+        </div>
+        <div class="pr-desc">
+          PyTorch 侧的 flex attention 支持（与 #2985 对应）。引入 Python-only 的替代代码路径，用户通过 <code>score_mod</code>/<code>score_mod_bprop</code> 自定义 attention 计算逻辑，底层由 cuDNN FE 执行。标记为 <span class="badge badge-ver">2.16.0</span>。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-feature">Flex Attention</span>
+          <span class="badge badge-feature">PyTorch</span>
+          <span class="badge badge-ver">2.16.0</span>
+          <span class="author">by vcherepanov-nv &middot; 05-13</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2991" target="_blank"><span class="pr-number">#2991</span> Improve TE Group MLP CPU Overhead</a>
+        </div>
+        <div class="pr-desc">
+          针对 Qwen3.5 35B-A3B (nano scale MoE 模型) 优化 grouped MLP 的 CPU 开销。测量从 H2D copy of <code>split_sizes</code> 到 grouped quantize kernel 启动的 CPU 时间。优化前 355us，预计有显著降低。继续推进 <a href="https://github.com/NVIDIA/TransformerEngine/issues/2897" target="_blank">#2897</a>。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-perf">CPU Overhead</span>
+          <span class="badge badge-feature">MoE</span>
+          <span class="reviewer-tag">reviewers: timmoon10, ptrendx, ksivaman</span>
+          <span class="author">by zhongbozhu &middot; 05-14</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2981" target="_blank"><span class="pr-number">#2981</span> GGEMM+srelu kernels for MxFP8 Nemotron</a>
+        </div>
+        <div class="pr-desc">
+          为 MxFP8 Nemotron 模型添加 GGEMM+srelu 融合 kernel。将 grouped GEMM 与 srelu 激活函数融合执行，减少显存带宽消耗和 kernel 启动开销。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-feature">GGEMM Fusion</span>
+          <span class="badge badge-feature">Nemotron</span>
+          <span class="badge badge-feature">MXFP8</span>
+          <span class="author">by sraman-rgb &middot; 05-12</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2978" target="_blank"><span class="pr-number">#2978</span> [Common, PyTorch] Improve mHC to match DeepSeek's implementation</a>
+        </div>
+        <div class="pr-desc">
+          改进 mHC (Manifold-Constrained Hyper-Connections) 实现以对齐 DeepSeek 的 <a href="https://github.com/deepseek-ai/TileKernels/tree/main/tile_kernels/mhc" target="_blank">TileKernels mHC</a> 实现。v2.15 刚发布的 mHC Triton kernel 功能的进一步完善。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-feature">mHC</span>
+          <span class="badge badge-feature">DeepSeek</span>
+          <span class="reviewer-tag">reviewer: ksivaman</span>
+          <span class="author">by kainzhong &middot; 05-12</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2994" target="_blank"><span class="pr-number">#2994</span> Plumb FP8+THD</a>
+        </div>
+        <div class="pr-desc">
+          将 FP8 支持贯穿到 THD (Token-Head-Dimension) format 的 attention 路径。为 FP8 + variable-length sequence (THD) 场景铺平道路。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-feature">FP8</span>
+          <span class="badge badge-feature">THD</span>
+          <span class="reviewer-tag">reviewer: cyanguwa</span>
+          <span class="author">by sudhakarsingh27 &middot; 05-14</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2977" target="_blank"><span class="pr-number">#2977</span> TP-invariant Training: bitwise-identical training across TP degrees and GPU architecture</a>
+        </div>
+        <div class="pr-desc">
+          <strong>重要 Draft PR。</strong>实现 TP-invariant GEMM，使得不同 TP 度数 (TP=1/2/4/8) 和不同 GPU 架构 (H100 == B300) 下的 fwd/bwd 训练结果按位一致。通过 <code>NVTE_TP_INVARIANT_MODE=1</code> 环境变量启用（默认关闭）。配套 Megatron-LM PR: <a href="https://github.com/NVIDIA/Megatron-LM/pull/4740" target="_blank">Megatron-LM#4740</a>。验证模型: Qwen3-8B。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-feature">TP-Invariant</span>
+          <span class="badge badge-feature">Reproducibility</span>
+          <span class="badge badge-draft">Draft</span>
+          <span class="author">by jinzex &middot; 05-11</span>
+        </div>
+      </li>
+    </ul>
+
+    <!-- Bugfix -->
+    <div class="sub-section">
+      <h3><span class="badge badge-bugfix">Bugfix</span> Bug 修复 <span class="sub-count">1</span></h3>
+    </div>
+    <ul class="pr-list">
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2974" target="_blank"><span class="pr-number">#2974</span> [Pytorch][Bug] DCP Checkpoint Loading Fixes for FSDP2 with QuantizedModelInit</a>
+        </div>
+        <div class="pr-desc">
+          修复 FSDP2 + QuantizedModelInit 场景下的多个 checkpoint 问题：(1) DCP Sync checkpoint loading for MXFP8/NVFP4；(2) DCP Async checkpoint loading for all quantization recipes；(3) NVFP4 allgather + dequant 数值错误（fsdp group 未正确设置为 amax reduction group）。标记为 <span class="badge badge-ver">2.16.0</span>。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-bugfix">Bug</span>
+          <span class="badge badge-feature">FSDP2</span>
+          <span class="badge badge-feature">Checkpoint</span>
+          <span class="badge badge-ver">2.16.0</span>
+          <span class="reviewer-tag">reviewer: ksivaman</span>
+          <span class="author">by vthumbe1503 &middot; 05-11</span>
+        </div>
+      </li>
+    </ul>
+
+    <!-- Build / Infra -->
+    <div class="sub-section">
+      <h3><span class="badge badge-compat">Build</span> 构建 &amp; 基础设施 <span class="sub-count">4</span></h3>
+    </div>
+    <ul class="pr-list">
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/3003" target="_blank"><span class="pr-number">#3003</span> Update cudnn-frontend to 1.23.0</a>
+        </div>
+        <div class="pr-desc">
+          将 cudnn-frontend 依赖更新到 1.23.0 版本。为 flex attention 等新功能提供底层支撑。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-compat">Dependency</span>
+          <span class="reviewer-tag">reviewer: cyanguwa</span>
+          <span class="author">by ksivaman &middot; 05-17</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/3002" target="_blank"><span class="pr-number">#3002</span> Add license to framework sdist builds</a>
+        </div>
+        <div class="pr-desc">
+          为 <code>transformer-engine-torch</code> 和 <code>transformer-engine-jax</code> PyPI 包添加 license 文件。标记为 <span class="badge badge-ver">2.16.0</span>。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-compat">Packaging</span>
+          <span class="badge badge-ver">2.16.0</span>
+          <span class="author">by ksivaman &middot; 05-17</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2983" target="_blank"><span class="pr-number">#2983</span> Split grouped quantize/activations and dbias for faster compilation</a>
+        </div>
+        <div class="pr-desc">
+          将 grouped quantize/activations 和 dbias 代码拆分为独立编译单元，利用多核并行编译加速构建。ptrendx 注释"正确的做法是 nvRTC 化，但这至少让编译更易管理"。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-compat">Build</span>
+          <span class="badge badge-perf">Compile Time</span>
+          <span class="reviewer-tag">reviewer: Oleg-Goncharov</span>
+          <span class="author">by ptrendx &middot; 05-12</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/3004" target="_blank"><span class="pr-number">#3004</span> Add optional core lib features to wheel build</a>
+        </div>
+        <div class="pr-desc">
+          在 wheel 构建中启用所有可选 core lib 特性（<code>NVTE_WITH_CUSOLVERMP</code>、<code>NVTE_WITH_CUBLASMP</code>、<code>NVTE_ENABLE_NVSHMEM</code>、<code>NVTE_UB_WITH_MPI</code>），使 pip install 的 wheel 功能与源码构建一致。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-compat">Wheel</span>
+          <span class="badge badge-draft">Draft</span>
+          <span class="reviewer-tag">reviewers: denera, cyanguwa, mk-61</span>
+          <span class="author">by ksivaman &middot; 05-17</span>
+        </div>
+      </li>
+    </ul>
+
+    <!-- CI / Test -->
+    <div class="sub-section">
+      <h3><span class="badge badge-ci">CI/Test</span> 测试优化 <span class="sub-count">1</span></h3>
+    </div>
+    <ul class="pr-list">
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2993" target="_blank"><span class="pr-number">#2993</span> CP Tests batching using subprocess worker pool</a>
+        </div>
+        <div class="pr-desc">
+          将 38 个 CP attention 测试配置合并到 subprocess worker pool 中执行。8xH100 上 ~554s wall time（其中 ~338s 是 38 次 NCCL init/teardown 开销）降至 ~216s 实际测试时间。这是上周 <a href="https://github.com/NVIDIA/TransformerEngine/pull/2965" target="_blank">#2965</a> 的演进版本。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-ci">CI Perf</span>
+          <span class="badge badge-perf">-60% time</span>
+          <span class="author">by sudhakarsingh27 &middot; 05-14</span>
+        </div>
+      </li>
+    </ul>
+
+    <!-- Doc -->
+    <div class="sub-section">
+      <h3><span class="badge badge-doc">Doc</span> 文档 <span class="sub-count">1</span></h3>
+    </div>
+    <ul class="pr-list">
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2976" target="_blank"><span class="pr-number">#2976</span> [JAX] Improve JAX tutorial documentation</a>
+        </div>
+        <div class="pr-desc">
+          全面改写 JAX tutorial：聚焦于单个操作的 usage + performance，从 .ipynb notebook 转为 .rst + 独立 .py 文件以便于 CI 测试。标记为 <span class="badge badge-ver">2.16.0</span>。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-doc">Doc</span>
+          <span class="badge badge-jax">JAX</span>
+          <span class="badge badge-ver">2.16.0</span>
+          <span class="reviewer-tag">reviewers: phu0ngng, tdophung</span>
+          <span class="author">by jberchtold-nvidia &middot; 05-11</span>
+        </div>
+      </li>
+    </ul>
+
+    <!-- Refactor / Other -->
+    <div class="sub-section">
+      <h3><span class="badge badge-ci">Refactor</span> 重构 &amp; 其他 <span class="sub-count">2</span></h3>
+    </div>
+    <ul class="pr-list">
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2992" target="_blank"><span class="pr-number">#2992</span> refactor(distributed): deduplicate TE module class lookups with caching</a>
+        </div>
+        <div class="pr-desc">
+          重构分布式模块中的 TE module class 查找逻辑，通过缓存消除重复查找，减少运行时开销。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-ci">Refactor</span>
+          <span class="reviewer-tag">reviewer: ksivaman</span>
+          <span class="author">by muutot &middot; 05-14</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2990" target="_blank"><span class="pr-number">#2990</span> Add codex/agents to .gitignore</a>
+        </div>
+        <div class="pr-desc">
+          将 AI agent 相关目录/文件添加到 <code>.gitignore</code>，移除路径后缀 <code>/</code> 以兼容 symlink 场景。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-ci">Infra</span>
+          <span class="author">by yaox12 &middot; 05-14</span>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- ==================== SECTION 3: ISSUES ==================== -->
+  <div class="section" id="issues">
+    <div class="section-header">
+      <span class="icon">&#x1F4DD;</span>
+      <h2>社区 Issues</h2>
+    </div>
+    <p style="color:var(--text-muted); margin-bottom:16px; font-size:0.9em;">上周新增 6 个 Issue（均为 OPEN），另有 4 个历史 Issue 被关闭。</p>
+
+    <div class="sub-section">
+      <h3>新增 Issues <span class="sub-count">6</span></h3>
+    </div>
+    <ul class="pr-list">
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/issues/2999" target="_blank"><span class="pr-number">#2999</span> Output routing map from fused_topk_with_scores in bitmap format</a>
+        </div>
+        <div class="pr-desc">
+          当前 routing map 输出格式为 bytemap，需要改为 bitmap 以优化空间占用和兼容 TE EP (Expert Parallelism)。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-feature">MoE</span>
+          <span class="badge badge-perf">Optimization</span>
+          <span class="author">by tdophung &middot; 05-15</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/issues/2998" target="_blank"><span class="pr-number">#2998</span> [JAX] Move quantization to before AG in MoEBlock</a>
+        </div>
+        <div class="pr-desc">
+          当前 MoEBlock 在 FSDP 下先 AllGather 权重再量化，导致量化 kernel 处理 FSDP 倍大的数据。应将量化移到 AG 之前以减少量化开销。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-perf">MoE</span>
+          <span class="badge badge-jax">JAX</span>
+          <span class="author">by tdophung &middot; 05-15</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/issues/2997" target="_blank"><span class="pr-number">#2997</span> [JAX] Integrate TE EP to MoEBlock</a>
+        </div>
+        <div class="pr-desc">
+          TE Expert Parallelism 即将就绪，创建此 issue 追踪将其集成到 MoEBlock 的工作。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-feature">MoE</span>
+          <span class="badge badge-jax">JAX</span>
+          <span class="author">by tdophung &middot; 05-15</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/issues/2995" target="_blank"><span class="pr-number">#2995</span> Reduce CPU overheads in te Sequential GroupedLinear Op</a>
+        </div>
+        <div class="pr-desc">
+          上周 <a href="https://github.com/NVIDIA/TransformerEngine/pull/2923" target="_blank">#2923</a> 为 Sequential GroupedLinear Op 添加了 Graph Safe 支持，但引入了 CPU 开销。需要定位瓶颈并优化。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-perf">CPU Overhead</span>
+          <span class="badge badge-feature">MoE</span>
+          <span class="author">by vthumbe1503 &middot; 05-14</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/issues/2988" target="_blank"><span class="pr-number">#2988</span> Activation + Group Quantize Fusion with te.Sequential</a>
+        </div>
+        <div class="pr-desc">
+          MoE Grouped MLP Block = GroupedLinear + Activation + GroupedLinear。第二个 GroupedLinear 需要 group_quantize。目标：将 Activation 与 group_quantize 融合执行，减少 kernel 启动次数和显存带宽消耗。需要在 <code>te.Sequential</code> 层面处理融合逻辑。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-feature">MoE</span>
+          <span class="badge badge-perf">Kernel Fusion</span>
+          <span class="author">by vthumbe1503 &middot; 05-13</span>
+        </div>
+      </li>
+      <li class="pr-item">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/issues/2986" target="_blank"><span class="pr-number">#2986</span> Expose Batch Invariant Kernels</a>
+        </div>
+        <div class="pr-desc">
+          后训练 (post-training) 工作中普遍需要 batch invariant kernels 来保证训练与推理之间的 log prob 完全一致。当前需要 monkey patching TE。请求 TE 原生暴露 batch invariant 的 grouped GEMM、regular GEMM、RMSNorm kernel。用例包括 Megatron 推理和 Megatron RL。
+        </div>
+        <div class="pr-meta">
+          <span class="badge badge-feature">Feature Request</span>
+          <span class="badge badge-feature">RL/Inference</span>
+          <span class="author">by wdykas &middot; 05-13</span>
+        </div>
+      </li>
+    </ul>
+
+    <div class="sub-section" style="margin-top:24px;">
+      <h3>已关闭 Issues <span class="sub-count">4</span></h3>
+    </div>
+    <ul class="pr-list">
+      <li class="issue-closed">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/issues/2956" target="_blank"><span class="pr-number">#2956</span> [BUG] NVFP4BlockScaling forward pass fails on RTX 5080 (sm_120)</a>
+        </div>
+        <div class="pr-desc">由 osubotin 于 05-03 创建，RTX 5080 消费级 Blackwell GPU 上 NVFP4 失败。本周通过 <a href="https://github.com/NVIDIA/TransformerEngine/pull/2968" target="_blank">#2968</a> (禁用非 SM100 的 RHT fusion) 修复后关闭。用户在 issue 中提供了详细的性能数据：workaround 模式下 RTX 5080 已达到 1.77x bf16 (170.64 TFLOPS)。</div>
+      </li>
+      <li class="issue-closed">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/issues/2908" target="_blank"><span class="pr-number">#2908</span> [Bug] moe_permute CUDA kernel: int32 overflow and incorrect -1 sentinel handling</a>
+        </div>
+        <div class="pr-desc">由 jing-4369 于 04-21 创建，报告 <code>permutation.cu</code> 中两个自 2024-08 以来的潜伏 bug。本周通过社区 PR <a href="https://github.com/NVIDIA/TransformerEngine/pull/2907" target="_blank">#2907</a> 修复后关闭。影响范围：v2.9 ~ v2.15 所有版本。</div>
+      </li>
+      <li class="issue-closed">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/issues/1018" target="_blank"><span class="pr-number">#1018</span> Error in NVRTC compilation</a>
+        </div>
+        <div class="pr-desc">由 tarunvallabh 于 2024-07 创建的长期 bug（CUDA 版本不一致导致 NVRTC 编译失败）。本周通过 <a href="https://github.com/NVIDIA/TransformerEngine/pull/2842" target="_blank">#2842</a> (报告 CUDA 版本信息) 改善诊断体验后关闭。</div>
+      </li>
+      <li class="issue-closed">
+        <div class="pr-title">
+          <a href="https://github.com/NVIDIA/TransformerEngine/issues/2332" target="_blank"><span class="pr-number">#2332</span> Replace TE check_support with FE check_support</a>
+        </div>
+        <div class="pr-desc">由 nvMelissa 于 2025-11 创建的重构请求（cuDNN 支持矩阵逻辑迁移到 cudnn-frontend）。本周由 nvMelissa 主动撤回关闭（"Cancelled / withdrawn request"）。相关工作可能由 <a href="https://github.com/NVIDIA/TransformerEngine/pull/2964" target="_blank">#2964</a> (refactor backend with cudnn-frontend calls) 以不同方式推进。</div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- ==================== SECTION 4: ROADMAP ==================== -->
+  <div class="section" id="roadmap">
+    <div class="section-header">
+      <span class="icon">&#x1F5FA;</span>
+      <h2>Roadmap &amp; Release 动态</h2>
+    </div>
+
+    <div class="roadmap-card" style="border-color: var(--badge-release);">
+      <h3>&#128230; Release 动态</h3>
+      <ul>
+        <li><span class="highlight">v2.15 正式发布 (2026-05-13)!</span> — 本周最大事件。Key Features 包括：Flash Attention 4 支持、MXFP8 attention、QGeGLU activation in te.ops and fused grouped MLP、per-token bias probability scaling、NVFP4 weight quantization in fused Adam optimizer、Triton kernels for mHC (Manifold-Constrained Hyper-Connections)。</li>
+        <li><span class="highlight">v2.15 milestone 状态</span> — Open，无 due date。<strong>3 个 Open PRs，11 个 Closed</strong>（与上周持平）。当前 v2.15 Open PRs：
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2829" target="_blank">#2829</a> (CP THD format support)、
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2596" target="_blank">#2596</a> (pad_between_seqs for A2A/P2P CP with FA3+THD)、
+          <a href="https://github.com/NVIDIA/TransformerEngine/pull/2443" target="_blank">#2443</a> (Comm+GEMM overlap with cuBlasMp)。
+          这 3 个 PR 均为长期 PR（始于 2025-10 ~ 2026-03），可能延期到 v2.16。</li>
+        <li><span class="highlight">v2.16 方向明确</span> — 本周有多个带 2.16.0 label 的 PR：#2825 (CP FA fix)、#2979 (JAX test)、#2985/#2984 (flex attention)、#3002 (license)、#2976 (JAX tutorial)、#2974 (FSDP2 checkpoint fix)。v2.16 正在同步推进"cuDNN flex attention + MoE 完善 + 基础设施升级"。</li>
+        <li><span class="highlight">发布节奏</span> — v2.12 (02-24) → v2.13 (03-31) → v2.14 (04-21) → v2.14.1 hotfix (04-24) → v2.15 (05-13)。约每月一版。v2.16 预计 6 月中旬。</li>
+      </ul>
+    </div>
+
+    <div class="roadmap-card" style="margin-top:16px; border-color: var(--green);">
+      <h3>活跃开发方向</h3>
+      <ul>
+        <li><span class="highlight">CPU Overhead 系统性攻坚</span> — 本周主题最突出的方向。#2900 (bulk-allocate)、#2957 (autocast caching)、#2666 (C++ make_empty) 合入；#3001 (pointer loading -48%)、#2991 (Group MLP overhead) 在 review。配合 tracking issue <a href="https://github.com/NVIDIA/TransformerEngine/issues/2897" target="_blank">#2897</a>，形成了从"发现问题 → 分解瓶颈 → 逐个击破"的系统化优化模式。目标明确：让 Grace/Blackwell 系统上的 CPU 不成为 GPU 训练的瓶颈。</li>
+        <li><span class="highlight">cuDNN Flex Attention 双端支持</span> — #2984 (PyTorch) 和 #2985 (JAX) 同时提交，为 TE 引入 cuDNN-backed flex attention。用户可通过 <code>score_mod</code> 函数自定义 attention 计算逻辑。这是 v2.16 的重要新特性方向。</li>
+        <li><span class="highlight">MoE 全栈持续完善</span> — 从 kernel 层 (#2981 GGEMM+srelu for Nemotron)、CPU overhead 层 (#2991, #2995)、fusion 层 (#2988 activation+quantize fusion)、架构层 (#2997/#2998/#2999 JAX MoEBlock EP 集成) 全方位推进。MoE 生态正从"单点功能可用"走向"生产级全链路优化"。</li>
+        <li><span class="highlight">torch.compile 基础设施就绪</span> — #2967 (Prepare linear for torch compile) 本周合入，将 Linear module 整理为 custom_op-ready 形式。后续只需一个 PR 即可注册为 <code>torch.library.custom_op</code>。torch.compile 的生产就绪已进入倒计时阶段。</li>
+        <li><span class="highlight">TP-Invariant Training 新方向</span> — #2977 (Draft) 提出跨 TP 度数和 GPU 架构的按位一致训练。这对于大规模训练的 debug、checkpoint 迁移和 reproducibility 研究有重要意义。配套 Megatron-LM PR 已同步提交。</li>
+        <li><span class="highlight">JAX Triton 生态增强</span> — #2975 (grid autotuning 3x speedup) 合入，#3000 (Triton CUDA graph 兼容) 在 review。JAX 侧的 Triton kernel 正从"可用"走向"高性能 + CUDA graph 兼容"。</li>
+        <li><span class="highlight">Batch Invariant Kernels 需求浮现</span> — #2986 来自社区的 feature request，反映了 TE 在 RL/推理场景（Megatron RL、post-training）中被广泛使用但缺乏 batch invariant 保证的痛点。</li>
+      </ul>
+    </div>
+
+    <div class="roadmap-card" style="margin-top:16px; border-color: var(--badge-perf);">
+      <h3>社区关注热点</h3>
+      <ul>
+        <li><span class="highlight">消费级 Blackwell GPU 支持完成</span> — 上周报告的 #2956 (RTX 5080 NVFP4 失败) 本周通过 #2968 修复并关闭。用户 osubotin 在 issue 中提供了完整的性能数据和 workaround 方案，最终反馈满意。NVIDIA 团队响应速度获得社区好评。</li>
+        <li><span class="highlight">MoE int32 溢出长期 bug 修复</span> — #2908 报告的 <code>moe_permute</code> int32 溢出 bug（影响 v2.9 ~ v2.15 所有版本），本周由社区贡献者 jing-4369 通过 #2907 修复。该 bug 自 2024-08 引入，影响大规模 token 场景。修复意义重大。</li>
+        <li><span class="highlight">MoE JAX MoEBlock 路线图</span> — tdophung 本周连续提交 3 个 tracking issues (#2997/#2998/#2999)，规划 JAX MoEBlock 的下一步：EP 集成、量化前置、bitmap routing。表明 JAX MoE 正进入架构级优化阶段。</li>
+        <li><span class="highlight">上周 Open Issues 进展</span> — #2973 (MXFP8TensorStorage reshape) 和 #2966 (MXFP8 EP padding) 仍无官方回复；#2945 (JAX softmax aux stats) 仍无更新。</li>
+        <li><span class="highlight">活跃社区贡献</span> — 本周合入 2 个 community-contribution PRs：#2907 (jing-4369, int32 溢出修复) 和 #2825 (zhujian19891203, CP FA 修复)。4over6 NVFP4 recipe (#2972, zianglih) 继续活跃讨论（12 条评论）。社区对 TE 的贡献热情持续。</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer">
+    Generated by QoderWork &middot; 2026-05-18 11:00 CST &middot; Data source: GitHub API (NVIDIA/TransformerEngine)
+  </div>
+
+</div>
+</body>
+</html>
